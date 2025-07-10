@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Layanan Pengaduan - Kantor Camat</title>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f2f2f2;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    h2 { text-align: center; }
+    button {
+      background: #28a745;
+      color: white;
+      padding: 10px;
+      border: none;
+      width: 100%;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+    label { margin-top: 10px; display: block; }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    #status {
+      margin-top: 15px;
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Layanan Pengaduan<br>Kantor Camat</h2>
+
+    <div id="reader" style="width:100%; margin-bottom:20px;"></div>
+    <button onclick="startScan()">Scan QR Code</button>
+
+    <form id="formPengaduan">
+      <label>Nama:</label>
+      <input type="text" name="nama" required />
+      <label>No HP:</label>
+      <input type="text" name="hp" required />
+      <label>Alamat:</label>
+      <input type="text" name="alamat" required />
+      <label>Isi Pengaduan:</label>
+      <textarea name="pengaduan" rows="4" required></textarea>
+      <button type="submit">Kirim Pengaduan</button>
+    </form>
+
+    <div id="status"></div>
+  </div>
+
+  <script>
+    function startScan() {
+      const html5QrCode = new Html5Qrcode("reader");
+      const config = { fps: 10, qrbox: 250 };
+
+      html5QrCode.start({ facingMode: "environment" }, config, qrCodeMessage => {
+        alert("QR Code Terdeteksi: " + qrCodeMessage);
+        html5QrCode.stop();
+      });
+    }
+
+    document.getElementById("formPengaduan").addEventListener("submit", function(e){
+      e.preventDefault();
+
+      const data = new FormData(this);
+      const jsonData = {};
+      data.forEach((value, key) => jsonData[key] = value);
+
+      fetch("https://script.google.com/macros/s/AKfycbyYCVw7uS1uphiocXjRKSxotZryYvuDguprClaXE0JbMGWsm9JuqdBMKJepx3mlFGPS/exec", {
+        method: "POST",
+        body: JSON.stringify(jsonData),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(res => res.text())
+      .then(data => {
+        document.getElementById("status").innerText = "Pengaduan berhasil dikirim. Terima kasih!";
+        document.getElementById("formPengaduan").reset();
+      })
+      .catch(err => {
+        document.getElementById("status").innerText = "Gagal mengirim pengaduan.";
+        console.error("Error:", err);
+      });
+    });
+  </script>
+</body>
+</html>
